@@ -4,11 +4,11 @@ from .base import BaseGenerator
 
 class CompanyGenerator(BaseGenerator):
     INDUSTRIES = [
-        "Computer Software", "Information Technology and Services", "Internet", "Marketing and Advertising",
-        "Financial Services", "Hospital & Health Care", "Retail", "Construction",
-        "Telecommunications", "Education Management", "Automotive", "Real Estate",
-        "Consumer Goods", "Manufacturing", "Media Production", "Transportation/Trucking/Railroad",
-        "Banks", "Insurance", "Non-Profit Organization Management"
+        "COMPUTER_SOFTWARE", "INFORMATION_TECHNOLOGY_AND_SERVICES", "INTERNET", "MARKETING_AND_ADVERTISING",
+        "FINANCIAL_SERVICES", "HOSPITAL_HEALTH_CARE", "RETAIL", "CONSTRUCTION",
+        "TELECOMMUNICATIONS", "EDUCATION_MANAGEMENT", "AUTOMOTIVE", "REAL_ESTATE",
+        "CONSUMER_GOODS", "MANUFACTURING", "MEDIA_PRODUCTION", "TRANSPORTATION_TRUCKING_RAILROAD",
+        "BANKS", "INSURANCE", "NON_PROFIT_ORGANIZATION_MANAGEMENT"
     ]
 
     def generate_one(self) -> Dict[str, Any]:
