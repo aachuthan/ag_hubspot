@@ -13,10 +13,7 @@ class CampaignGenerator(BaseGenerator):
         # API usually expects these in the key-value map or under a 'properties' key depending on endpoint version.
         # We will provide a flat dictionary which the inserter can then format as needed (e.g. into 'properties': {...})
         return {
-            "name": name_val,  # Internal/Old name
             "hs_name": name_val, # REQUIRED: The campaign name
-            
-            "appName": "HubSpot Data Gen",
             
             # Writable Standard Properties
             "hs_start_date": str(int(start_date.timestamp() * 1000)),
@@ -33,13 +30,6 @@ class CampaignGenerator(BaseGenerator):
             "hs_utm_medium": random.choice(["cpc", "organic", "social", "email"]),
             "hs_utm_content": "variation_" + random.choice(["a", "b", "c"]),
             "hs_utm_term": self.fake.word(),
-            
-            # Legacy/Alternative keys sometimes used by different endpoints
-            "utmCampaign": self.fake.slug(),
-            "utmSource": random.choice(["facebook", "google", "linkedin", "email"]),
-            "utmMedium": random.choice(["cpc", "organic", "social", "email"]),
-            "utmContent": "variation_" + random.choice(["a", "b", "c"]),
-            "utmTerm": self.fake.word(),
         }
 
     def generate_budget_item(self) -> Dict[str, Any]:
