@@ -3,11 +3,19 @@ from typing import Dict, Any
 from .base import BaseGenerator
 
 class CompanyGenerator(BaseGenerator):
+    INDUSTRIES = [
+        "Computer Software", "Information Technology and Services", "Internet", "Marketing and Advertising",
+        "Financial Services", "Hospital & Health Care", "Retail", "Construction",
+        "Telecommunications", "Education Management", "Automotive", "Real Estate",
+        "Consumer Goods", "Manufacturing", "Media Production", "Transportation/Trucking/Railroad",
+        "Banks", "Insurance", "Non-Profit Organization Management"
+    ]
+
     def generate_one(self) -> Dict[str, Any]:
         return {
             "name": self.fake.company(),
             "domain": self.fake.domain_name(),
-            "industry": "Computer Software", # Standard HubSpot value
+            "industry": random.choice(self.INDUSTRIES),
             "about_us": self.fake.text(max_nb_chars=200),
             "phone": self.fake.phone_number(),
             "address": self.fake.street_address(),
