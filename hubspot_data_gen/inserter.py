@@ -32,6 +32,7 @@ class HubSpotInserter:
             payload = {"inputs": inputs}
             
             url = f"{self.base_url}/{object_type}/batch/create"
+            response = None
             
             try:
                 response = requests.post(url, headers=self.headers, json=payload)
