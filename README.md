@@ -1,99 +1,106 @@
-# HubSpot Dummy Data Generator
+# HubSpot Data Generator
 
-A modular Python application to generate and insert dummy data into HubSpot CRM and Marketing Hub. 
+![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)
+![HubSpot API](https://img.shields.io/badge/HubSpot-API%20v3-orange)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-## 🚀 Quick Start
+A modular, extensible Python application designed to generate rich dummy data for HubSpot's CRM and Marketing Hub. It ensures all data adheres to HubSpot's standard properties and API requirements, making it ideal for testing integrations, dashboards, and workflows.
 
-1.  **Install**: `pip install -r requirements.txt`
-2.  **Token**: `export HUBSPOT_ACCESS_TOKEN="your-token"`
-3.  **Run**: `python main.py --all-marketing --count 5`
+## ✨ Features
 
----
+- **Rich Marketing Objects**:
+  - **Campaigns**: Generates campaigns with correct `hs_` properties, UTM parameters, budget, and spend data.
+  - **Forms**: Creates GDPR-compliant forms with proper context (cookies, page URI) and contact field mappings.
+  - **Marketing Events**: Simulates webinars/conferences with valid ISO timestamps and external IDs.
+- **Robust CRM Data**:
+  - **Standard Objects**: Contacts, Companies, Deals, Tickets with batch insertion support.
+  - **Engagements**: Logs Meetings (with outcomes, locations) and Emails (in/out direction, HTML content) to the CRM.
+- **Orchestration**:
+  - Automatically links generated Assets (like Forms) to Campaigns.
+  - Simulates sequential user journeys (e.g., Contact -> Form Submit -> Deal Created).
 
-## Features
+## 📂 Project Structure
 
-- **CRM Objects**: Contacts, Companies, Deals, Tickets (Batch Insert).
-- **Marketing Objects**: Campaigns (with Budget & Spend), Forms, Marketing Events.
-- **Engagements**: Meetings, Emails (logged to CRM).
-- **Orchestration**: Automatically links generated Assets (Forms) to generated Campaigns.
-
-## Setup
-
-1.  **Prerequisites**: Python 3.8+ installed.
-
-2.  **Install Dependencies**:
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-3.  **Configure API Token**:
-    Create a Private App in HubSpot and ensure it has the **Required Scopes** (see below).
-    Set the `HUBSPOT_ACCESS_TOKEN` environment variable.
-    
-    *Windows (PowerShell)*:
-    ```powershell
-    $env:HUBSPOT_ACCESS_TOKEN = "your-private-app-access-token"
-    ```
-    *Mac/Linux*:
-    ```bash
-    export HUBSPOT_ACCESS_TOKEN="your-private-app-access-token"
-    ```
-
-### Required Scopes
-Ensure your Private App has these scopes enabled:
-- `crm.objects.contacts.write`
-- `crm.objects.companies.write`
-- `crm.objects.deals.write`
-- `crm.objects.tickets.write`
-- `files` (often needed for assets)
-- `forms` (for Forms API)
-- `marketing.campaigns.write` (for Campaigns, Budget, Assets)
-- `crm.objects.marketing_events.write`
-- `crm.objects.contacts.read` (for linking)
-
-## Usage
-
-### 1. Marketing Hub Orchestration (Recommended)
-Generates Forms and Campaigns, then links them together and adds budget items.
-
-```bash
-# Generate 10 items total and insert to HubSpot
-python main.py --all-marketing --count 10
-
-# Dry run (preview only)
-python main.py --all-marketing --count 10 --dry-run
+```text
+hubspot_data_gen/
+├── generators/           # Logic for creating dummy data dictionaries
+│   ├── base.py           # Base generator class using Faker
+│   ├── campaigns.py      # Campaign & Budget generation
+│   ├── forms.py          # Form v3 payload generation
+│   ├── ...               # Other object generators
+├── inserters/            # Logic for sending data to HubSpot API
+│   ├── base.py           # Base API handler (auth, batching)
+│   ├── marketing.py      # Marketing-specific insertion logic
+├── main.py               # CLI Entry point
 ```
 
-### 2. Single Object Generation
+## 🛠️ Setup
+
+### 1. Prerequisites
+- Python 3.8 or higher
+- A HubSpot Portal (Test account recommended)
+
+### 2. Installation
 ```bash
-# CRM
+pip install -r requirements.txt
+```
+
+### 3. Configuration
+You need a **Private App Access Token** from your HubSpot portal.
+
+**Set Environment Variable:**
+- **Windows (PowerShell)**: `$env:HUBSPOT_ACCESS_TOKEN = "your-token"`
+- **Mac/Linux**: `export HUBSPOT_ACCESS_TOKEN="your-token"`
+
+### 4. Required Scopes
+Ensure your Private App has the following scopes enabled:
+
+| Category | Scopes | Purpose |
+|----------|--------|---------|
+| **CRM** | `crm.objects.contacts.write`, `crm.objects.contacts.read` | Create/Link Contacts |
+| | `crm.objects.companies.write` | Create Companies |
+| | `crm.objects.deals.write` | Create Deals |
+| | `crm.objects.tickets.write` | Create Tickets |
+| **Marketing** | `marketing.campaigns.write` | Create Campaigns, Assets |
+| | `forms` | Create Forms |
+| | `crm.objects.marketing_events.write` | Create Marketing Events |
+| **Files** | `files` | (Optional) For asset management |
+
+## 🚀 Usage
+
+### Marketing Hub Orchestration (Recommended)
+Generates a complete marketing dataset: Campaigns, Forms, and Marketing Events, properly linked and populated.
+
+```bash
+# Generate 10 sets of marketing data
+python main.py --all-marketing --count 10
+
+# Dry Run (Preview payload without sending to HubSpot)
+python main.py --all-marketing --count 1 --dry-run
+```
+
+### Single Object Generation
+Generate specific objects in isolation.
+
+```bash
+# CRM Objects
 python main.py --object contacts --count 50
-python main.py --object companies --count 20
 python main.py --object deals --count 20
-python main.py --object tickets --count 10
 
 # Engagements
 python main.py --object meetings --count 10
 python main.py --object emails --count 10
 
-# Marketing
+# Marketing Objects
 python main.py --object campaigns --count 5
-python main.py --object forms --count 5
-python main.py --object marketing_events --count 5
 ```
 
-## Debugging
+## 🐛 Debugging & Troubleshooting
 
-**VS Code**:
-1.  Open **Run and Debug** (`Ctrl+Shift+D`).
-2.  Select **"Python: Insert Contacts (Live)"** and press **F5**.
+- **401 Unauthorized**: verification failed. Check `HUBSPOT_ACCESS_TOKEN`.
+- **403 Forbidden**: Missing scopes. Check the **Required Scopes** table above.
+- **Properties Errors**: If you see errors about "read-only" properties, ensure you are not trying to write to system headers. This tool is tuned to use only writable `hs_` standard properties.
 
-**CLI**:
-```bash
-python -m pdb main.py --object contacts --count 1 --dry-run
-```
-
-## Troubleshooting
-- **401 Unauthorized**: Check your `HUBSPOT_ACCESS_TOKEN`. Ensure no extra spaces.
-- **403 Forbidden**: Check your **Scopes**. You likely missed one (e.g., `marketing.campaigns.write`).
-- **429 Too Many Requests**: The tool handles this automatically, but if you see it often, wait a few minutes.
+### VS Code Debugging
+1. Open the **Run and Debug** tab (`Ctrl+Shift+D`).
+2. Select "Python: Current File" or configure a `launch.json` for `main.py` with arguments.

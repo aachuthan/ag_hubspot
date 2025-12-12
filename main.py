@@ -115,6 +115,8 @@ def run_marketing_orchestration(inserter, count, dry_run):
                 "form": form_ids 
             }
             inserter.associate_assets_to_campaigns(camp_ids, asset_map)
+        elif not camp_ids:
+            print("[WARN] No campaigns created, skipping linking.")
         
     else:
         print(f"[Dry Run] Generated {len(camp_data)} campaigns + Budget/Spend simulation.")

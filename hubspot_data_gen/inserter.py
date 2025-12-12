@@ -45,6 +45,7 @@ class HubSpotInserter:
             inputs = [{"properties": record} for record in chunk]
             payload = {"inputs": inputs}
             
+            response = None
             try:
                 response = requests.post(url, headers=self.headers, json=payload, timeout=self.timeout)
                 response.raise_for_status()
@@ -58,7 +59,7 @@ class HubSpotInserter:
                 print(f"Successfully inserted batch {i // MAX_BATCH_SIZE + 1} ({len(chunk)} records).")
             except requests.exceptions.RequestException as e:
                 print(f"Error inserting batch {i // MAX_BATCH_SIZE + 1}: {e}")
-                if response is not None and response.text: # Check if response has text
+                if response is not None:
                      print("Response:", response.text)
             
             # Rate Limit Sleep
@@ -83,7 +84,7 @@ class HubSpotInserter:
                 print(f"Created {object_type} {index + 1}/{len(records)}")
             except requests.exceptions.RequestException as e:
                 print(f"Error creating {object_type} {index + 1}: {e}")
-                if response is not None and response.text:
+                if response is not None:
                      print("Response:", response.text)
             
             # Rate Limit Sleep for sequential

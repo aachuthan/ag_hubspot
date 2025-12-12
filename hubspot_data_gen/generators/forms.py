@@ -11,12 +11,31 @@ class FormGenerator(BaseGenerator):
             "formType": "hubspot",
             "configuration": {
                 "createNewContactForNewEmail": "true",
-                "notifyRecipients": "",
+                "notifyRecipients": "marketing@example.com", # Added dummy email
                 "language": "en",
                 "postSubmitAction": {
                     "type": "thank_you_message",
                     "value": "Thanks for submitting the form!"
+                },
+                # Detailed GDPR Consent Options
+                "legalConsentOptions": {
+                    "type": "explicit_consent_to_process",
+                    "consentToProcessText": "I agree to allow Example Co. to store and process my personal data.",
+                    "communicationsCheckboxes": [
+                        {
+                            "label": "I agree to receive marketing communications.",
+                            "required": False,
+                            "subscriptionTypeId": 999 # Dummy Subscription Type ID
+                        }
+                    ]
                 }
+            },
+            # Context Object for Submission (Simulated)
+            "context": {
+                "hutk": self.fake.uuid4(), # Simulated HubSpot Cookie
+                "ipAddress": self.fake.ipv4(),
+                "pageUri": self.fake.url(),
+                "pageName": self.fake.bs().title()
             },
             "fieldGroups": [
                 {
@@ -38,6 +57,30 @@ class FormGenerator(BaseGenerator):
                              "required": False,
                              "enabled": True,
                              "hidden": False,
+                        },
+                        {
+                            "name": "lastname",
+                            "label": "Last Name",
+                            "fieldType": "text",
+                             "required": False,
+                             "enabled": True,
+                             "hidden": False,
+                        },
+                        {
+                            "name": "mobilephone",
+                            "label": "Mobile Phone",
+                            "fieldType": "phonenumber",
+                             "required": False,
+                             "enabled": True,
+                             "hidden": False,
+                        },
+                        {
+                            "name": "company",
+                            "label": "Company",
+                            "fieldType": "text",
+                             "required": False,
+                             "enabled": True,
+                             "hidden": False,
                         }
                     ]
                 }
@@ -45,8 +88,5 @@ class FormGenerator(BaseGenerator):
              "displayOptions": {
                 "theme": "canvas",
                 "style": "legal-consent"
-             },
-             "legalConsentOptions": {
-                 "type": "none"
              }
         }
