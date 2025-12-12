@@ -28,12 +28,17 @@ def main():
     camp_data = camp_gen.generate_one()
     camp_keys = ["hs_name", "hs_start_date", "hs_end_date", "hs_campaign_status", "hs_utm_campaign"]
     verify_dict_keys(camp_data, camp_keys, "Campaigns")
+    print(f"  > Campaign Dates: Start={camp_data['hs_start_date']}, End={camp_data['hs_end_date']}")
+    budget_item = camp_gen.generate_budget_item()
+    spend_item = camp_gen.generate_spend_item()
+    print(f"  > Spend Date: {spend_item['date']}")
 
     # Marketing Events
     event_gen = MarketingEventGenerator()
     event_data = event_gen.generate_one()
     event_keys = ["externalAccountId", "externalEventId", "startDateTime", "eventType"]
     verify_dict_keys(event_data, event_keys, "Marketing Events")
+    print(f"  > Event Dates: Start={event_data['startDateTime']}, End={event_data['endDateTime']}")
 
     # Forms
     form_gen = FormGenerator()
@@ -54,12 +59,14 @@ def main():
     meet_data = meet_gen.generate_one()
     meet_keys = ["hs_timestamp", "hs_meeting_title", "hs_activity_type", "hs_meeting_start_time"]
     verify_dict_keys(meet_data, meet_keys, "Meetings")
+    print(f"  > Meeting Timestamp: {meet_data['hs_timestamp']}")
 
     # Emails
     email_gen = EmailEngagementGenerator()
     email_data = email_gen.generate_one()
     email_keys = ["hs_timestamp", "hs_email_subject", "hs_email_html", "hs_email_headers"]
     verify_dict_keys(email_data, email_keys, "Emails")
+    print(f"  > Email Timestamp: {email_data['hs_timestamp']}")
 
 if __name__ == "__main__":
     main()

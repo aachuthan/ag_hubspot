@@ -16,8 +16,8 @@ class CampaignGenerator(BaseGenerator):
             "hs_name": name_val, # REQUIRED: The campaign name
             
             # Writable Standard Properties
-            "hs_start_date": str(int(start_date.timestamp() * 1000)),
-            "hs_end_date": str(int(end_date.timestamp() * 1000)),
+            "hs_start_date": start_date.strftime("%Y-%m-%d"),
+            "hs_end_date": end_date.strftime("%Y-%m-%d"),
             "hs_notes": self.fake.sentence(),
             "hs_audience": random.choice(["Existing Customers", "New Leads", "Churned Users", "High Value"]),
             "hs_currency_code": "USD",
@@ -43,6 +43,6 @@ class CampaignGenerator(BaseGenerator):
         return {
             "name": f"Spend: {self.fake.bs()}",
             "amount": str(random.randint(100, 5000)),
-            "date": int(datetime.now().timestamp() * 1000),
+            "date": datetime.now().strftime("%Y-%m-%d"),
             "description": self.fake.sentence()
         }

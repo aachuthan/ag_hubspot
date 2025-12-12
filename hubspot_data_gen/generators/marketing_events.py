@@ -1,11 +1,11 @@
 import random
 from typing import Dict, Any
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from .base import BaseGenerator
 
 class MarketingEventGenerator(BaseGenerator):
     def generate_one(self) -> Dict[str, Any]:
-        start_date = datetime.now() + timedelta(days=random.randint(10, 60))
+        start_date = datetime.now(timezone.utc) + timedelta(days=random.randint(10, 60))
         end_date = start_date + timedelta(hours=2)
         
         # REQUIRED Properties
@@ -22,8 +22,8 @@ class MarketingEventGenerator(BaseGenerator):
             # REQUIRED / Standard Properties
             "externalAccountId": external_account_id,
             "externalEventId": external_event_id,
-            "startDateTime": start_date.isoformat() + "Z", # Marketing events use ISO8601
-            "endDateTime": end_date.isoformat() + "Z",
+            "startDateTime": start_date.strftime("%Y-%m-%dT%H:%M:%SZ"), # Marketing events use ISO8601 UTC
+            "endDateTime": end_date.strftime("%Y-%m-%dT%H:%M:%SZ"),
             
             "eventCancelled": False,
             "customProperties": [] # Keeping empty as requested to stick to standard
