@@ -1,5 +1,6 @@
 import argparse
 import sys
+import os
 from typing import List, Dict, Any
 from hubspot_data_gen.generators import (
     ContactGenerator, CompanyGenerator, DealGenerator, TicketGenerator,
@@ -28,12 +29,26 @@ def main():
         parser.print_help()
         sys.exit(1)
 
+    # Pre-flight Check: Token
+    if not args.dry_run:
+        token = os.getenv("HUBSPOT_ACCESS_TOKEN")
+        if not token:
+            print("\n[ERROR] HUBSPOT_ACCESS_TOKEN environment variable not set.")
+            print("Please set it before running in live mode.")
+            print("Example (PowerShell): $env:HUBSPOT_ACCESS_TOKEN = 'your-token'")
+            sys.exit(1)
+
     inserter = HubSpotInserter()
 
-    if args.all_marketing:
-        run_marketing_orchestration(inserter, args.count, args.dry_run)
-    else:
-        run_single_object(inserter, args.object, args.count, args.dry_run)
+    try:
+        if args.all_marketing:
+            run_marketing_orchestration(inserter, args.count, args.dry_run)
+        else:
+            run_single_object(inserter, args.object, args.count, args.dry_run)
+    except Exception as e:
+        print(f"\n[CRITICAL ERROR] An unexpected error occurred: {e}")
+        # In debug mode (or if user wants) we could re-raise.
+        # raise e 
 
 def get_generator(obj_type: str):
     if obj_type == "contacts": return ContactGenerator()
@@ -54,7 +69,11 @@ def run_single_object(inserter, obj_type, count, dry_run):
         return
 
     print(f"Generating {count} {obj_type}...")
-    data = generator.generate(count)
+    try:
+        data = generator.generate(count)
+    except Exception as e:
+         print(f"[ERROR] Failed to generate data for {obj_type}: {e}")
+         return
 
     if dry_run:
         print(f"Dry run for {obj_type}. Example:")
@@ -68,36 +87,34 @@ def run_marketing_orchestration(inserter, count, dry_run):
     # 1. Generate Assets
     # Forms
     form_gen = FormGenerator()
+    print(f"Generating forms...")
     forms_data = form_gen.generate(max(1, count // 2))
     form_ids = []
+    
     if not dry_run:
         form_ids = inserter.batch_insert("forms", forms_data)
     else:
         print(f"[Dry Run] Generated {len(forms_data)} forms.")
 
-    # Emails (Engagements, but used here as proxy for assets to link)
-    # Note: Creating actual Marketing Emails (content) is complex. 
-    # We will skip linking 'email' assets for now as we are generating CRM engagements, 
-    # which cannot be linked to campaigns as assets (Marketing Emails != Sales Emails).
-    # We will focus on Forms.
-
     # 2. Generate Campaigns
     camp_gen = CampaignGenerator()
-    camp_data = camp_gen.generate(max(1, count // 5)) # Fewer campaigns than assets
+    print(f"Generating campaigns...")
+    camp_data = camp_gen.generate(max(1, count // 5)) 
     camp_ids = []
     
     if not dry_run:
         camp_ids = inserter.batch_insert("campaigns", camp_data)
         
         # 3. Add Budget/Spend
-        inserter.insert_campaign_sub_items(camp_ids, camp_gen)
+        if camp_ids:
+            inserter.insert_campaign_sub_items(camp_ids, camp_gen)
         
         # 4. Link Assets
-        asset_map = {
-            "form": form_ids 
-            # "email": email_ids (Skipped, see above)
-        }
-        inserter.associate_assets_to_campaigns(camp_ids, asset_map)
+        if camp_ids and form_ids:
+            asset_map = {
+                "form": form_ids 
+            }
+            inserter.associate_assets_to_campaigns(camp_ids, asset_map)
         
     else:
         print(f"[Dry Run] Generated {len(camp_data)} campaigns + Budget/Spend simulation.")

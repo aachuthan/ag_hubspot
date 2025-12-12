@@ -7,7 +7,7 @@ class CompanyGenerator(BaseGenerator):
         return {
             "name": self.fake.company(),
             "domain": self.fake.domain_name(),
-            "industry": self.fake.job(), # Using job as a proxy for industry string
+            "industry": "Computer Software", # Standard HubSpot value
             "about_us": self.fake.text(max_nb_chars=200),
             "phone": self.fake.phone_number(),
             "address": self.fake.street_address(),
