@@ -1,61 +1,85 @@
 # HubSpot Dummy Data Generator
 
-A modular Python application to generate and insert dummy data into HubSpot CRM. This tool allows you to create bulk Contacts, Companies, Deals, and Tickets with realistic data using the Faker library and inserts them via the HubSpot Batch API.
+A modular Python application to generate and insert dummy data into HubSpot CRM and Marketing Hub. This tool supports creating Contacts, Companies, Deals, Tickets, as well as Marketing Campaigns, Forms, Events, and Engagements.
 
-## Project Structure
-- `hubspot_data_gen/`: Main package containing generators and insertion logic.
-    - `generators/`: Contains `base.py` and specific object generators (`contacts.py`, `companies.py`, `deals.py`, `tickets.py`).
-    - `inserter.py`: Handles batch API requests to HubSpot.
-    - `config.py`: Configuration (API token).
-- `main.py`: CLI entry point.
-- `requirements.txt`: Project dependencies.
+## Features
+
+- **CRM Objects**: Contacts, Companies, Deals, Tickets (Batch Insert).
+- **Marketing Objects**: Campaigns (with Budget & Spend), Forms, Marketing Events.
+- **Engagements**: Meetings, Emails (logged to CRM).
+- **Orchestration**: Automatically links generated Assets (Forms) to generated Campaigns.
+- **Dry Run**: Preview data generation without hitting the API.
 
 ## Setup
 
-1.  **Install Dependencies:**
+1.  **Prerequisites**: Python 3.8+ installed.
+
+2.  **Install Dependencies**:
     ```bash
     pip install -r requirements.txt
     ```
 
-2.  **Configure API Token:**
-    - Set the `HUBSPOT_ACCESS_TOKEN` environment variable with your Private App Access Token.
-    - Alternatively, you can edit `hubspot_data_gen/config.py` directly (not recommended for git).
-
-    **PowerShell:**
+3.  **Configure API Token**:
+    Set the `HUBSPOT_ACCESS_TOKEN` environment variable with your Private App Access Token.
+    
+    *Windows (PowerShell)*:
     ```powershell
     $env:HUBSPOT_ACCESS_TOKEN = "your-private-app-access-token"
     ```
-    **Bash/Mac/Linux:**
+    *Mac/Linux*:
     ```bash
     export HUBSPOT_ACCESS_TOKEN="your-private-app-access-token"
     ```
 
 ## Usage
 
-Run the `main.py` script to generate data. The script supports generating Contacts, Companies, Deals, and Tickets.
+Run `main.py` to generate data.
 
-### 1. Dry Run (Generate only)
-Use the `--dry-run` flag to generate data and verify the output structure without making any API calls to HubSpot.
-
-```bash
-python main.py --object contacts --count 5 --dry-run
-python main.py --object companies --count 5 --dry-run
-python main.py --object deals --count 5 --dry-run
-python main.py --object tickets --count 5 --dry-run
-```
-
-### 2. Insert Data
-Remove the `--dry-run` flag to insert data into your HubSpot portal.
+### 1. Marketing Hub Orchestration (Recommended)
+Generates Forms and Campaigns, then links them together and adds budget items.
 
 ```bash
-# Generate and insert 100 contacts
-python main.py --object contacts --count 100
+# Generate 10 items total (Forms, Campaigns, Assets) and insert to HubSpot
+python main.py --all-marketing --count 10
 
-# Generate and insert 50 companies
-python main.py --object companies --count 50
+# Dry run (preview only)
+python main.py --all-marketing --count 10 --dry-run
 ```
 
-## Features
-- **Modular**: Easy to add new object generators in `generators/`.
-- **Comprehensive Fields**: Populates maximum standard fields based on HubSpot's latest API documentation.
-- **Batch Processing**: Inserts data in batches of 100 to respect API limits and ensure performance.
+### 2. Single Object Generation
+Generate specific objects individually.
+
+**CRM Objects:**
+```bash
+python main.py --object contacts --count 50
+python main.py --object companies --count 20
+python main.py --object deals --count 20
+python main.py --object tickets --count 10
+python main.py --object meetings --count 10
+python main.py --object emails --count 10
+```
+
+**Marketing Objects:**
+```bash
+python main.py --object campaigns --count 5
+python main.py --object forms --count 5
+python main.py --object marketing_events --count 5
+```
+
+### Options
+- `--count, -c`: Number of records to generate (default: 10).
+- `--dry-run`: Print generated data to console instead of sending to HubSpot.
+- `--all-marketing`: Enable full marketing orchestration flow.
+
+## Debugging
+
+**VS Code**:
+1.  Open the **Run and Debug** view (`Ctrl+Shift+D`).
+2.  Select **"Python: Insert Contacts (Live)"** or **"Python: Dry Run Contacts"**.
+3.  Press **F5**.
+    *Note: You can pass custom arguments by editing `.vscode/launch.json`.*
+
+**CLI**:
+```bash
+python -m pdb main.py --object contacts --count 1 --dry-run
+```
