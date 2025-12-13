@@ -20,9 +20,6 @@ class CallGenerator(BaseGenerator):
             "hs_call_to_number": self.fake.phone_number(),
             "hs_call_recording_url": self.fake.url(),
             
-            # Standard Activity Type
-            "hs_activity_type": "CALL",
-            
-            # Owner ID is typically required for proper assignment, but we'll leave it out or random if we had owners
+            # "hubspot_owner_id": "...",
             # "hubspot_owner_id": "...", 
         }
