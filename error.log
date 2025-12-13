@@ -6,3 +6,9 @@
 2025-12-13 19:27:34,863 - ERROR - Example (PowerShell): $env:HUBSPOT_ACCESS_TOKEN = 'your-token'
 2025-12-13 19:31:01,169 - CRITICAL - An unexpected error occurred: HubSpot Access Token is missing. Please set HUBSPOT_ACCESS_TOKEN.
 2025-12-13 19:45:41,783 - CRITICAL - An unexpected error occurred: RetryError[<Future at 0x1b6ab78a650 state=finished raised HTTPError>]
+2025-12-13 20:02:35,461 - ERROR - HUBSPOT_ACCESS_TOKEN environment variable not set.
+2025-12-13 20:02:35,464 - ERROR - Please set it before running in live mode.
+2025-12-13 20:02:35,465 - ERROR - Example (PowerShell): $env:HUBSPOT_ACCESS_TOKEN = 'your-token'
+2025-12-13 20:03:23,601 - ERROR - Failed inserting batch 1: 400 Client Error: Bad Request for url: https://api.hubapi.com/crm/v3/objects/companies/batch/create
+2025-12-13 20:03:23,602 - ERROR - HubSpot Message: Property values were not valid: [{"isValid":false,"message":"Property \"invalid_test_prop\" does not exist","error":"PROPERTY_DOESNT_EXIST","name":"invalid_test_prop","localizedErrorMessage":"Property \"invalid_test_prop\" does not exist","portalId":244590485}]
+2025-12-13 20:03:23,603 - ERROR - -> Field 'invalid_test_prop': Property "invalid_test_prop" does not exist

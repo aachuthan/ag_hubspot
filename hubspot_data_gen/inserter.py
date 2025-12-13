@@ -24,7 +24,8 @@ class HubSpotInserter:
     @retry(
         retry=retry_if_exception_type(requests.exceptions.RequestException),
         stop=stop_after_attempt(5),
-        wait=wait_exponential(multiplier=1, min=1, max=10)
+        wait=wait_exponential(multiplier=1, min=1, max=10),
+        reraise=True
     )
     def _post_with_retry(self, url: str, json_data: Any) -> requests.Response:
         """Helper to perform POST requests with retry logic."""
@@ -35,7 +36,8 @@ class HubSpotInserter:
     @retry(
         retry=retry_if_exception_type(requests.exceptions.RequestException),
         stop=stop_after_attempt(3),
-        wait=wait_exponential(multiplier=1, min=1, max=10)
+        wait=wait_exponential(multiplier=1, min=1, max=10),
+        reraise=True
     )
     def _put_with_retry(self, url: str) -> requests.Response:
          """Helper to perform PUT requests with retry logic."""
@@ -83,9 +85,8 @@ class HubSpotInserter:
                     
                 logger.info(f"Successfully inserted batch {i // MAX_BATCH_SIZE + 1} ({len(chunk)} records).")
             except requests.exceptions.RequestException as e:
-                logger.error(f"Error inserting batch {i // MAX_BATCH_SIZE + 1}: {e}")
-                if e.response is not None:
-                     logger.error(f"Response: {e.response.text}")
+                self._log_hubspot_error(e, f"inserting batch {i // MAX_BATCH_SIZE + 1}")
+                # Don't create 'response' variable as it's not needed with helper
             
             # Rate Limit Sleep (Basic throttle on top of retry)
             time.sleep(1.0) 
@@ -106,9 +107,7 @@ class HubSpotInserter:
                 
                 logger.info(f"Created {object_type} {index + 1}/{len(records)}")
             except requests.exceptions.RequestException as e:
-                logger.error(f"Error creating {object_type} {index + 1}: {e}")
-                if e.response is not None:
-                     logger.error(f"Response: {e.response.text}")
+                self._log_hubspot_error(e, f"creating {object_type} {index + 1}")
             
             # Rate Limit Sleep for sequential
             time.sleep(0.3)
@@ -156,6 +155,31 @@ class HubSpotInserter:
                     self._put_with_retry(url)
                     logger.info(f"Linked {asset_type} {asset_id} to campaign {campaign_id}")
                 except Exception as e:
-                    logger.error(f"Failed to link {asset_type} {asset_id} to {campaign_id}: {e}")
+                    self._log_hubspot_error(e, f"linking {asset_type} {asset_id} to {campaign_id}")
                 
                 time.sleep(0.2)
+
+    def _log_hubspot_error(self, e: Exception, context: str):
+        """Helper to log detailed HubSpot errors."""
+        logger.error(f"Failed {context}: {e}")
+        
+        if hasattr(e, 'response') and e.response is not None:
+            try:
+                error_data = e.response.json()
+                message = error_data.get('message', 'No message')
+                
+                logger.error(f"HubSpot Message: {message}")
+                
+                if 'failures' in error_data: # Batch failures
+                    for failure in error_data['failures']:
+                        logger.error(f"Failure Detail: {failure}")
+
+                if 'errors' in error_data: # Standard validation errors
+                    for err in error_data['errors']:
+                        prop_name = err.get('context', {}).get('propertyName', ['Unknown Property'])[0]
+                        err_msg = err.get('message', '')
+                        logger.error(f"-> Field '{prop_name}': {err_msg}")
+                        
+            except ValueError:
+                # Not JSON
+                logger.error(f"Raw Response: {e.response.text}")
