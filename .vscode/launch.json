@@ -34,6 +34,75 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Python: Dry Run Calls",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--object",
+                "calls",
+                "--count",
+                "1",
+                "--dry-run"
+            ]
+        },
+        {
+            "name": "Python: Dry Run Tasks",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--object",
+                "tasks",
+                "--count",
+                "1",
+                "--dry-run"
+            ]
+        },
+        {
+            "name": "Python: Dry Run Notes",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--object",
+                "notes",
+                "--count",
+                "1",
+                "--dry-run"
+            ]
+        },
+        {
+            "name": "Python: Dry Run Products",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--object",
+                "products",
+                "--count",
+                "1",
+                "--dry-run"
+            ]
+        },
+        {
+            "name": "Python: Insert Companies (Live)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--object",
+                "companies",
+                "--count",
+                "1"
+            ]
         }
     ]
 }

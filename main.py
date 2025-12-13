@@ -5,10 +5,27 @@ import logging
 from typing import List, Dict, Any
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
+root_logger = logging.getLogger()
+root_logger.setLevel(logging.INFO)
+
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+
+# Clear existing handlers to avoid duplication if re-run
+if root_logger.hasHandlers():
+    root_logger.handlers.clear()
+
+# Console Handler
+console_handler = logging.StreamHandler(sys.stdout)
+console_handler.setLevel(logging.INFO)
+console_handler.setFormatter(formatter)
+root_logger.addHandler(console_handler)
+
+# File Handler (Errors only)
+file_handler = logging.FileHandler("error.log", mode='a', encoding='utf-8')
+file_handler.setLevel(logging.ERROR)
+file_handler.setFormatter(formatter)
+root_logger.addHandler(file_handler)
+
 logger = logging.getLogger(__name__)
 
 from hubspot_data_gen.generators import (

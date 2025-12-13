@@ -7,11 +7,7 @@ from typing import List, Dict, Any, Optional
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 from .config import ACCESS_TOKEN, MAX_BATCH_SIZE
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
+# Logger initialized in main.py or via basicConfig if run independently (though not recommended)
 logger = logging.getLogger(__name__)
 
 class HubSpotInserter:
