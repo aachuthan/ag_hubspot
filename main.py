@@ -5,7 +5,8 @@ from typing import List, Dict, Any
 from hubspot_data_gen.generators import (
     ContactGenerator, CompanyGenerator, DealGenerator, TicketGenerator,
     CampaignGenerator, FormGenerator, MeetingGenerator, 
-    EmailEngagementGenerator, MarketingEventGenerator
+    EmailEngagementGenerator, MarketingEventGenerator,
+    CallGenerator, TaskGenerator, NoteGenerator
 )
 from hubspot_data_gen.inserter import HubSpotInserter
 
@@ -13,7 +14,8 @@ def main():
     parser = argparse.ArgumentParser(description="Generate and insert dummy data into HubSpot.")
     parser.add_argument("--object", "-o", type=str, 
                         choices=["contacts", "companies", "deals", "tickets", 
-                                 "campaigns", "forms", "meetings", "emails", "marketing_events"],
+                                 "campaigns", "forms", "meetings", "emails", "marketing_events",
+                                 "calls", "tasks", "notes"],
                         help="The object type to generate data for.")
     parser.add_argument("--count", "-c", type=int, default=10, 
                         help="Number of records to generate.")
@@ -60,6 +62,9 @@ def get_generator(obj_type: str):
     elif obj_type == "meetings": return MeetingGenerator()
     elif obj_type == "emails": return EmailEngagementGenerator()
     elif obj_type == "marketing_events": return MarketingEventGenerator()
+    elif obj_type == "calls": return CallGenerator()
+    elif obj_type == "tasks": return TaskGenerator()
+    elif obj_type == "notes": return NoteGenerator()
     return None
 
 def run_single_object(inserter, obj_type, count, dry_run):

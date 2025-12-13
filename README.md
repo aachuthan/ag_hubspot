@@ -13,11 +13,13 @@ A modular, extensible Python application designed to generate rich dummy data fo
   - **Forms**: Creates GDPR-compliant forms with proper context (cookies, page URI) and contact field mappings.
   - **Marketing Events**: Simulates webinars/conferences with valid ISO timestamps and external IDs.
 - **Robust CRM Data**:
-  - **Standard Objects**: Contacts, Companies, Deals, Tickets with batch insertion support.
-  - **Engagements**: Logs Meetings (with outcomes, locations) and Emails (in/out direction, HTML content) to the CRM.
+  - **Standard Objects**: Contacts, Companies, Deals, Tickets, Products.
+  - **Engagements**: Logs Meetings, Emails, Calls, Tasks, and Notes with rich metadata.
 - **Orchestration**:
   - Automatically links generated Assets (like Forms) to Campaigns.
   - Simulates sequential user journeys (e.g., Contact -> Form Submit -> Deal Created).
+- **Bulk Ingestion**:
+  - Efficiently creates records in batches (up to 100 at a time) to respect API rate limits.
 
 ## 📂 Project Structure
 
@@ -25,12 +27,10 @@ A modular, extensible Python application designed to generate rich dummy data fo
 hubspot_data_gen/
 ├── generators/           # Logic for creating dummy data dictionaries
 │   ├── base.py           # Base generator class using Faker
-│   ├── campaigns.py      # Campaign & Budget generation
-│   ├── forms.py          # Form v3 payload generation
+│   ├── campaigns.py      # Campaign generation
+│   ├── calls.py          # Call engagement generation
 │   ├── ...               # Other object generators
-├── inserters/            # Logic for sending data to HubSpot API
-│   ├── base.py           # Base API handler (auth, batching)
-│   ├── marketing.py      # Marketing-specific insertion logic
+├── inserter.py           # Logic for batching and sending data to HubSpot API
 ├── main.py               # CLI Entry point
 ```
 
@@ -57,42 +57,50 @@ Ensure your Private App has the following scopes enabled:
 
 | Category | Scopes | Purpose |
 |----------|--------|---------|
-| **CRM** | `crm.objects.contacts.write`, `crm.objects.contacts.read` | Create/Link Contacts |
+| **CRM** | `crm.objects.contacts.write` | Create Contacts |
 | | `crm.objects.companies.write` | Create Companies |
 | | `crm.objects.deals.write` | Create Deals |
 | | `crm.objects.tickets.write` | Create Tickets |
+| **Engagements** | `crm.objects.contacts.write` | (Often covers standard engagements) |
+| | *Note: Some portals split engagement scopes.* | |
 | **Marketing** | `marketing.campaigns.write` | Create Campaigns, Assets |
 | | `forms` | Create Forms |
 | | `crm.objects.marketing_events.write` | Create Marketing Events |
-| **Files** | `files` | (Optional) For asset management |
 
 ## 🚀 Usage
 
-### Marketing Hub Orchestration (Recommended)
-Generates a complete marketing dataset: Campaigns, Forms, and Marketing Events, properly linked and populated.
+You can generate and bulk insert any of the following supported objects. The tool automatically handles batching.
 
+### 1. CRM Objects
 ```bash
-# Generate 10 sets of marketing data
-python main.py --all-marketing --count 10
-
-# Dry Run (Preview payload without sending to HubSpot)
-python main.py --all-marketing --count 1 --dry-run
+python main.py --object contacts --count 100
+python main.py --object companies --count 50
+python main.py --object deals --count 50
+python main.py --object tickets --count 20
 ```
 
-### Single Object Generation
-Generate specific objects in isolation.
-
+### 2. Engagements (HubSpot V3 Objects)
+These create engagement records directly in the CRM.
 ```bash
-# CRM Objects
-python main.py --object contacts --count 50
-python main.py --object deals --count 20
-
-# Engagements
 python main.py --object meetings --count 10
 python main.py --object emails --count 10
+python main.py --object calls --count 10
+python main.py --object tasks --count 10
+python main.py --object notes --count 10
+```
 
-# Marketing Objects
+### 3. Marketing Objects
+```bash
 python main.py --object campaigns --count 5
+python main.py --object marketing_events --count 5
+# Forms (Note: Forms API is sequential)
+python main.py --object forms --count 5
+```
+
+### 4. Full Dry Run (Safe Test)
+Preview the data that *would* be sent without actually touching your HubSpot portal.
+```bash
+python main.py --object calls --count 1 --dry-run
 ```
 
 ## 🐛 Debugging & Troubleshooting
