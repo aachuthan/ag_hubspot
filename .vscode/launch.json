@@ -102,7 +102,10 @@
                 "companies",
                 "--count",
                 "1"
-            ]
+            ],
+            "env": {
+                "HUBSPOT_ACCESS_TOKEN": ""
+            }
         }
     ]
 }
