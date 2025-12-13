@@ -21,7 +21,7 @@ class CampaignGenerator(BaseGenerator):
             "hs_notes": self.fake.sentence(),
             "hs_audience": random.choice(["Existing Customers", "New Leads", "Churned Users", "High Value"]),
             "hs_currency_code": "USD",
-            "hs_campaign_status": "active", # planned, in_progress, active, paused, completed
+            "hs_campaign_status": random.choice(["draft", "scheduled", "in_progress", "completed"]), # Standardized values
             "hs_color_hex": self.fake.hex_color(),
             
             # UTM Parameters (standardized keys)

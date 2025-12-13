@@ -28,7 +28,7 @@ class CompanyGenerator(BaseGenerator):
             "numberofemployees": random.randint(1, 10000),
             "annualrevenue": random.randint(10000, 100000000),
             "description": self.fake.bs(),
-            "founded_year": str(random.randint(1900, 2024)),
+            "yearfounded": str(random.randint(1900, 2024)),
             "timezone": self.fake.timezone(),
             # "lifecyclestage": random.choice(["subscriber", "lead", "marketingqualifiedlead", "salesqualifiedlead", "opportunity", "customer", "evangelist", "other"]),
         }

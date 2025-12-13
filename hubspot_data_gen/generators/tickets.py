@@ -14,5 +14,5 @@ class TicketGenerator(BaseGenerator):
             "hs_pipeline": "0",
             "hs_pipeline_stage": random.choice(stages),
             "hs_ticket_priority": random.choice(priorities),
-            "source_type": random.choice(["EMAIL", "CHAT", "PHONE", "FORM"]),
+            "source": random.choice(["EMAIL", "CHAT", "PHONE", "FORM"]),
         }
