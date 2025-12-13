@@ -19,7 +19,7 @@ class EmailEngagementGenerator(BaseGenerator):
             "hs_email_text": email_text,
             "hs_email_html": email_html,
             "hs_email_direction": random.choice(["INCOMING_EMAIL", "EMAIL"]),
-            "hs_email_status": random.choice(["SENT", "BOUNCED", "OPENED", "FAILED", "SCHEDULED"]),
+            "hs_email_status": random.choice(["SENT", "BOUNCED", "FAILED", "SCHEDULED", "SENDING"]),
             
             # Standard Headers (JSON String)
             "hs_email_headers": "{\"from\": \"sender@example.com\", \"to\": \"recipient@example.com\"}",
