@@ -12,3 +12,46 @@
 2025-12-13 20:03:23,601 - ERROR - Failed inserting batch 1: 400 Client Error: Bad Request for url: https://api.hubapi.com/crm/v3/objects/companies/batch/create
 2025-12-13 20:03:23,602 - ERROR - HubSpot Message: Property values were not valid: [{"isValid":false,"message":"Property \"invalid_test_prop\" does not exist","error":"PROPERTY_DOESNT_EXIST","name":"invalid_test_prop","localizedErrorMessage":"Property \"invalid_test_prop\" does not exist","portalId":244590485}]
 2025-12-13 20:03:23,603 - ERROR - -> Field 'invalid_test_prop': Property "invalid_test_prop" does not exist
+2025-12-13 20:27:45,516 - ERROR - Failed inserting batch 1: 400 Client Error: Bad Request for url: https://api.hubapi.com/crm/v3/objects/tickets/batch/create
+2025-12-13 20:27:45,517 - ERROR - Full Error Response: {
+  "status": "error",
+  "message": "Property values were not valid: [{\"isValid\":false,\"message\":\"Property \\\"source\\\" does not exist\",\"error\":\"PROPERTY_DOESNT_EXIST\",\"name\":\"source\",\"localizedErrorMessage\":\"Property \\\"source\\\" does not exist\",\"portalId\":244590485}]",
+  "correlationId": "6dfb204e-e1d4-43a7-b00e-208b1212c3ec",
+  "errors": [
+    {
+      "message": "Property \"source\" does not exist",
+      "code": "PROPERTY_DOESNT_EXIST",
+      "context": {
+        "propertyName": [
+          "source"
+        ]
+      }
+    }
+  ],
+  "category": "VALIDATION_ERROR"
+}
+2025-12-13 20:27:45,529 - ERROR - HubSpot Message: Property values were not valid: [{"isValid":false,"message":"Property \"source\" does not exist","error":"PROPERTY_DOESNT_EXIST","name":"source","localizedErrorMessage":"Property \"source\" does not exist","portalId":244590485}]
+2025-12-13 20:27:45,531 - ERROR - -> Field 'source': Property "source" does not exist
+2025-12-13 20:28:41,569 - ERROR - Failed inserting batch 1: 403 Client Error: Forbidden for url: https://api.hubapi.com/crm/v3/objects/products/batch/create
+2025-12-13 20:28:41,583 - ERROR - Full Error Response: {
+  "status": "error",
+  "message": "This app hasn't been granted all required scopes to make this call. Read more about required scopes here: https://developers.hubspot.com/scopes.",
+  "correlationId": "86091092-f291-471a-907f-030c53b97b39",
+  "errors": [
+    {
+      "message": "One or more of the following scopes are required.",
+      "context": {
+        "requiredGranularScopes": [
+          "crm.objects.products.write",
+          "e-commerce"
+        ]
+      }
+    }
+  ],
+  "links": {
+    "scopes": "https://developers.hubspot.com/scopes"
+  },
+  "category": "MISSING_SCOPES"
+}
+2025-12-13 20:28:41,626 - ERROR - HubSpot Message: This app hasn't been granted all required scopes to make this call. Read more about required scopes here: https://developers.hubspot.com/scopes.
+2025-12-13 20:28:41,631 - ERROR - -> Field 'Unknown Property': One or more of the following scopes are required.

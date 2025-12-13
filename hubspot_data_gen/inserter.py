@@ -166,6 +166,8 @@ class HubSpotInserter:
         if hasattr(e, 'response') and e.response is not None:
             try:
                 error_data = e.response.json()
+                logger.error(f"Full Error Response: {json.dumps(error_data, indent=2)}")
+                
                 message = error_data.get('message', 'No message')
                 
                 logger.error(f"HubSpot Message: {message}")
