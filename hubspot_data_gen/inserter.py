@@ -2,8 +2,17 @@ import requests
 import json
 import math
 import time
+import logging
 from typing import List, Dict, Any, Optional
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 from .config import ACCESS_TOKEN, MAX_BATCH_SIZE
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 class HubSpotInserter:
     def __init__(self, token: str = ACCESS_TOKEN):
@@ -15,6 +24,28 @@ class HubSpotInserter:
             "Content-Type": "application/json"
         }
         self.timeout = 60 # Seconds, recommended 60-90s by HubSpot
+
+    @retry(
+        retry=retry_if_exception_type(requests.exceptions.RequestException),
+        stop=stop_after_attempt(5),
+        wait=wait_exponential(multiplier=1, min=1, max=10)
+    )
+    def _post_with_retry(self, url: str, json_data: Any) -> requests.Response:
+        """Helper to perform POST requests with retry logic."""
+        response = requests.post(url, headers=self.headers, json=json_data, timeout=self.timeout)
+        response.raise_for_status()
+        return response
+
+    @retry(
+        retry=retry_if_exception_type(requests.exceptions.RequestException),
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=1, max=10)
+    )
+    def _put_with_retry(self, url: str) -> requests.Response:
+         """Helper to perform PUT requests with retry logic."""
+         response = requests.put(url, headers=self.headers, timeout=self.timeout)
+         response.raise_for_status()
+         return response
 
     def batch_insert(self, object_type: str, records: List[Dict[str, Any]]) -> List[str]:
         """
@@ -37,7 +68,7 @@ class HubSpotInserter:
 
     def _insert_batch_generic(self, object_type: str, records: List[Dict[str, Any]], url: str) -> List[str]:
         total_records = len(records)
-        print(f"Starting batch insert for {total_records} {object_type}...")
+        logger.info(f"Starting batch insert for {total_records} {object_type}...")
         all_created_ids = []
 
         for i in range(0, total_records, MAX_BATCH_SIZE):
@@ -45,10 +76,8 @@ class HubSpotInserter:
             inputs = [{"properties": record} for record in chunk]
             payload = {"inputs": inputs}
             
-            response = None
             try:
-                response = requests.post(url, headers=self.headers, json=payload, timeout=self.timeout)
-                response.raise_for_status()
+                response = self._post_with_retry(url, payload)
                 data = response.json()
                 
                 # Collect IDs
@@ -56,36 +85,34 @@ class HubSpotInserter:
                     ids = [item["id"] for item in data["results"]]
                     all_created_ids.extend(ids)
                     
-                print(f"Successfully inserted batch {i // MAX_BATCH_SIZE + 1} ({len(chunk)} records).")
+                logger.info(f"Successfully inserted batch {i // MAX_BATCH_SIZE + 1} ({len(chunk)} records).")
             except requests.exceptions.RequestException as e:
-                print(f"Error inserting batch {i // MAX_BATCH_SIZE + 1}: {e}")
-                if response is not None:
-                     print("Response:", response.text)
+                logger.error(f"Error inserting batch {i // MAX_BATCH_SIZE + 1}: {e}")
+                if e.response is not None:
+                     logger.error(f"Response: {e.response.text}")
             
-            # Rate Limit Sleep
-            time.sleep(1.0) # 1 second delay between batches
+            # Rate Limit Sleep (Basic throttle on top of retry)
+            time.sleep(1.0) 
         
         return all_created_ids
 
     def _insert_sequential(self, object_type: str, records: List[Dict[str, Any]], url: str) -> List[str]:
-        print(f"Starting sequential insert for {len(records)} {object_type}...")
+        logger.info(f"Starting sequential insert for {len(records)} {object_type}...")
         created_ids = []
         for index, record in enumerate(records):
-            response = None
             try:
-                response = requests.post(url, headers=self.headers, json=record, timeout=self.timeout)
-                response.raise_for_status()
+                response = self._post_with_retry(url, record)
                 data = response.json()
                 if "id" in data:
                     created_ids.append(data["id"])
                 elif "externalEventId" in record:
                      created_ids.append(record["externalEventId"])
                 
-                print(f"Created {object_type} {index + 1}/{len(records)}")
+                logger.info(f"Created {object_type} {index + 1}/{len(records)}")
             except requests.exceptions.RequestException as e:
-                print(f"Error creating {object_type} {index + 1}: {e}")
-                if response is not None:
-                     print("Response:", response.text)
+                logger.error(f"Error creating {object_type} {index + 1}: {e}")
+                if e.response is not None:
+                     logger.error(f"Response: {e.response.text}")
             
             # Rate Limit Sleep for sequential
             time.sleep(0.3)
@@ -94,30 +121,30 @@ class HubSpotInserter:
 
     def insert_campaign_sub_items(self, campaign_ids: List[str], generator):
         """Add Budget and Spend items to created campaigns."""
-        print(f"Adding Budget and Spend items to {len(campaign_ids)} campaigns...")
+        logger.info(f"Adding Budget and Spend items to {len(campaign_ids)} campaigns...")
         
         for campaign_id in campaign_ids:
             # Add Budget
             try:
                 budget = generator.generate_budget_item()
                 url = f"{self.base_marketing_url}/campaigns/{campaign_id}/budget"
-                requests.post(url, headers=self.headers, json=budget, timeout=self.timeout)
+                self._post_with_retry(url, budget)
             except Exception as e:
-                print(f"Failed to add budget to campaign {campaign_id}: {e}")
+                logger.error(f"Failed to add budget to campaign {campaign_id}: {e}")
 
             # Add Spend
             try:
                 spend = generator.generate_spend_item()
                 url = f"{self.base_marketing_url}/campaigns/{campaign_id}/spend"
-                requests.post(url, headers=self.headers, json=spend, timeout=self.timeout)
+                self._post_with_retry(url, spend)
             except Exception as e:
-                print(f"Failed to add spend to campaign {campaign_id}: {e}")
+                logger.error(f"Failed to add spend to campaign {campaign_id}: {e}")
             
             time.sleep(0.2) 
 
     def associate_assets_to_campaigns(self, campaign_ids: List[str], asset_map: Dict[str, List[str]]):
         """Associate assets to campaigns."""
-        print("Associating assets to campaigns...")
+        logger.info("Associating assets to campaigns...")
         
         for asset_type, asset_ids in asset_map.items():
             if not asset_ids:
@@ -130,9 +157,9 @@ class HubSpotInserter:
                 url = f"{self.base_marketing_url}/campaigns/{campaign_id}/assets/{asset_type}/{asset_id}"
                 
                 try:
-                    requests.put(url, headers=self.headers, timeout=self.timeout)
-                    print(f"Linked {asset_type} {asset_id} to campaign {campaign_id}")
+                    self._put_with_retry(url)
+                    logger.info(f"Linked {asset_type} {asset_id} to campaign {campaign_id}")
                 except Exception as e:
-                    print(f"Failed to link {asset_type} {asset_id} to {campaign_id}: {e}")
+                    logger.error(f"Failed to link {asset_type} {asset_id} to {campaign_id}: {e}")
                 
                 time.sleep(0.2)

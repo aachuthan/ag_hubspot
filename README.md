@@ -77,6 +77,7 @@ python main.py --object contacts --count 100
 python main.py --object companies --count 50
 python main.py --object deals --count 50
 python main.py --object tickets --count 20
+python main.py --object products --count 20
 ```
 
 ### 2. Engagements (HubSpot V3 Objects)

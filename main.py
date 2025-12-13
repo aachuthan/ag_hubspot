@@ -1,12 +1,21 @@
 import argparse
 import sys
 import os
+import logging
 from typing import List, Dict, Any
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
 from hubspot_data_gen.generators import (
     ContactGenerator, CompanyGenerator, DealGenerator, TicketGenerator,
     CampaignGenerator, FormGenerator, MeetingGenerator, 
     EmailEngagementGenerator, MarketingEventGenerator,
-    CallGenerator, TaskGenerator, NoteGenerator
+    CallGenerator, TaskGenerator, NoteGenerator, ProductGenerator
 )
 from hubspot_data_gen.inserter import HubSpotInserter
 
@@ -15,7 +24,7 @@ def main():
     parser.add_argument("--object", "-o", type=str, 
                         choices=["contacts", "companies", "deals", "tickets", 
                                  "campaigns", "forms", "meetings", "emails", "marketing_events",
-                                 "calls", "tasks", "notes"],
+                                 "calls", "tasks", "notes", "products"],
                         help="The object type to generate data for.")
     parser.add_argument("--count", "-c", type=int, default=10, 
                         help="Number of records to generate.")
@@ -35,9 +44,9 @@ def main():
     if not args.dry_run:
         token = os.getenv("HUBSPOT_ACCESS_TOKEN")
         if not token:
-            print("\n[ERROR] HUBSPOT_ACCESS_TOKEN environment variable not set.")
-            print("Please set it before running in live mode.")
-            print("Example (PowerShell): $env:HUBSPOT_ACCESS_TOKEN = 'your-token'")
+            logger.error("HUBSPOT_ACCESS_TOKEN environment variable not set.")
+            logger.error("Please set it before running in live mode.")
+            logger.error("Example (PowerShell): $env:HUBSPOT_ACCESS_TOKEN = 'your-token'")
             sys.exit(1)
 
     inserter = HubSpotInserter()
@@ -48,7 +57,7 @@ def main():
         else:
             run_single_object(inserter, args.object, args.count, args.dry_run)
     except Exception as e:
-        print(f"\n[CRITICAL ERROR] An unexpected error occurred: {e}")
+        logger.critical(f"An unexpected error occurred: {e}")
         # In debug mode (or if user wants) we could re-raise.
         # raise e 
 
@@ -65,45 +74,46 @@ def get_generator(obj_type: str):
     elif obj_type == "calls": return CallGenerator()
     elif obj_type == "tasks": return TaskGenerator()
     elif obj_type == "notes": return NoteGenerator()
+    elif obj_type == "products": return ProductGenerator()
     return None
 
 def run_single_object(inserter, obj_type, count, dry_run):
     generator = get_generator(obj_type)
     if not generator:
-        print(f"Unknown Object: {obj_type}")
+        logger.error(f"Unknown Object: {obj_type}")
         return
 
-    print(f"Generating {count} {obj_type}...")
+    logger.info(f"Generating {count} {obj_type}...")
     try:
         data = generator.generate(count)
     except Exception as e:
-         print(f"[ERROR] Failed to generate data for {obj_type}: {e}")
+         logger.error(f"Failed to generate data for {obj_type}: {e}")
          return
 
     if dry_run:
-        print(f"Dry run for {obj_type}. Example:")
-        print(data[0] if data else "No data")
+        logger.info(f"Dry run for {obj_type}. Example:")
+        print(data[0] if data else "No data") # Keep print for data output to be clean
     else:
         inserter.batch_insert(obj_type, data)
 
 def run_marketing_orchestration(inserter, count, dry_run):
-    print("=== Starting Marketing Hub Orchestration ===")
+    logger.info("=== Starting Marketing Hub Orchestration ===")
     
     # 1. Generate Assets
     # Forms
     form_gen = FormGenerator()
-    print(f"Generating forms...")
+    logger.info(f"Generating forms...")
     forms_data = form_gen.generate(max(1, count // 2))
     form_ids = []
     
     if not dry_run:
         form_ids = inserter.batch_insert("forms", forms_data)
     else:
-        print(f"[Dry Run] Generated {len(forms_data)} forms.")
+        logger.info(f"[Dry Run] Generated {len(forms_data)} forms.")
 
     # 2. Generate Campaigns
     camp_gen = CampaignGenerator()
-    print(f"Generating campaigns...")
+    logger.info(f"Generating campaigns...")
     camp_data = camp_gen.generate(max(1, count // 5)) 
     camp_ids = []
     
@@ -121,11 +131,11 @@ def run_marketing_orchestration(inserter, count, dry_run):
             }
             inserter.associate_assets_to_campaigns(camp_ids, asset_map)
         elif not camp_ids:
-            print("[WARN] No campaigns created, skipping linking.")
+            logger.warning("No campaigns created, skipping linking.")
         
     else:
-        print(f"[Dry Run] Generated {len(camp_data)} campaigns + Budget/Spend simulation.")
-        print(f"[Dry Run] Would link {len(forms_data)} forms to these campaigns.")
+        logger.info(f"[Dry Run] Generated {len(camp_data)} campaigns + Budget/Spend simulation.")
+        logger.info(f"[Dry Run] Would link {len(forms_data)} forms to these campaigns.")
 
 if __name__ == "__main__":
     main()
