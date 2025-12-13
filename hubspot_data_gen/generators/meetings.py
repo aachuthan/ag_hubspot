@@ -24,8 +24,6 @@ class MeetingGenerator(BaseGenerator):
             "hs_meeting_outcome": random.choice(["SCHEDULED", "COMPLETED", "RESCHEDULED", "NO_SHOW"]),
             "hs_meeting_external_url": self.fake.url(),
             
-            # Standard Activity Type (defaulting to Meeting)
-            "hs_activity_type": "Meeting",
             
             # Attachments (Empty for now, but field is standard)
             "hs_attachment_ids": "" 
