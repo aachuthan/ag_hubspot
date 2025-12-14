@@ -20,6 +20,8 @@ A modular, extensible Python application designed to generate rich dummy data fo
   - Simulates sequential user journeys (e.g., Contact -> Form Submit -> Deal Created).
 - **Bulk Ingestion**:
   - Efficiently creates records in batches (up to 100 at a time) to respect API rate limits.
+- **Developer Guide**:
+  - See [General CRM Ingestion Guidelines](GENERAL_CRM_INGESTION_GUIDELINES.md) for architectural patterns and best practices.
 
 ## 📂 Project Structure
 
