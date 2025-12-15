@@ -12,6 +12,7 @@ A modular, extensible Python application designed to generate rich dummy data fo
   - **Campaigns**: Generates campaigns with correct `hs_` properties, UTM parameters, budget, and spend data.
   - **Forms**: Creates GDPR-compliant forms with proper context (cookies, page URI) and contact field mappings.
   - **Marketing Events**: Simulates webinars/conferences with valid ISO timestamps and external IDs.
+  - **Marketing Emails**: Generates draft marketing emails with subject, content, and template settings.
 - **Robust CRM Data**:
   - **Standard Objects**: Contacts, Companies, Deals, Tickets, Products.
   - **Engagements**: Logs Meetings, Emails, Calls, Tasks, and Notes with rich metadata.
@@ -66,6 +67,7 @@ Ensure your Private App has the following scopes enabled:
 | **Engagements** | `crm.objects.contacts.write` | (Often covers standard engagements) |
 | | *Note: Some portals split engagement scopes.* | |
 | **Marketing** | `marketing.campaigns.write` | Create Campaigns, Assets |
+| | `content` | Create Marketing Emails |
 | | `forms` | Create Forms |
 | | `crm.objects.marketing_events.write` | Create Marketing Events |
 
@@ -96,6 +98,7 @@ python main.py --object notes --count 10
 ```bash
 python main.py --object campaigns --count 5
 python main.py --object marketing_events --count 5
+python main.py --object marketing_emails --count 5
 # Forms (Note: Forms API is sequential)
 python main.py --object forms --count 5
 ```
