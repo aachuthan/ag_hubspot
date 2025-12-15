@@ -11,10 +11,12 @@ from .calls import CallGenerator
 from .tasks import TaskGenerator
 from .notes import NoteGenerator
 from .products import ProductGenerator
+from .marketing_emails import MarketingEmailGenerator
 
 __all__ = [
     'ContactGenerator', 'CompanyGenerator', 'DealGenerator', 'TicketGenerator',
     'CampaignGenerator', 'FormGenerator', 'MeetingGenerator',
     'EmailEngagementGenerator', 'MarketingEventGenerator',
-    'CallGenerator', 'TaskGenerator', 'NoteGenerator', 'ProductGenerator'
+    'CallGenerator', 'TaskGenerator', 'NoteGenerator', 'ProductGenerator',
+    'MarketingEmailGenerator'
 ]

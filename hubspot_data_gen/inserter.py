@@ -56,6 +56,8 @@ class HubSpotInserter:
 
         if object_type == "forms":
             return self._insert_sequential(object_type, records, f"{self.base_marketing_url}/forms")
+        elif object_type == "marketing_emails":
+            return self._insert_sequential(object_type, records, f"{self.base_marketing_url}/emails")
         elif object_type == "marketing_events":
             return self._insert_sequential(object_type, records, f"{self.base_marketing_url}/marketing-events/events")
         elif object_type == "campaigns":
